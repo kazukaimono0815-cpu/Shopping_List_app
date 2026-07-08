@@ -852,7 +852,7 @@ export default function App() {
             <Sparkles className="h-5 w-5 text-blue-400 flex-shrink-0 mt-0.5" />
             <div>
               <p className="text-xs sm:text-sm text-slate-200 font-bold">
-                複数ファイルの同時アップロード・表形式消込仕様をサポートしました！
+                複数ファイルの同時アップロード・表形式消込仕様をサポートしました
               </p>
               <p className="text-[11px] text-slate-400 mt-0.5">
                 PDF内の表データをそっくりそのまま表示。スマホでタップしやすい大型チェックボックスで、消し込んだアイテムは瞬時に進捗率へ反映されます。
