@@ -22,69 +22,78 @@ st.markdown("""
     
     /* Main title */
     .main-title {
-        font-size: 26px !important;
+        font-size: 24px !important;
         font-weight: bold;
         text-align: center;
-        margin-bottom: 15px;
+        margin-bottom: 10px;
         color: #3B82F6;
     }
 
-    /* Button enlargement for mobile and PC */
-    div.stButton > button {
-        font-size: 16px !important;
-        padding: 10px 20px !important;
-        width: 100%;
-        border-radius: 10px !important;
-        background-color: #3B82F6 !important;
-        color: white !important;
-        border: none !important;
-        font-weight: bold !important;
-        box-shadow: 0 4px 6px rgba(59, 130, 246, 0.15);
+    /* Expander / Accordion Styling */
+    .streamlit-expanderHeader {
+        background-color: #1E293B !important;
+        border: 1px solid #334155 !important;
+        border-radius: 8px !important;
+        padding: 10px !important;
     }
-    div.stButton > button:hover {
-        background-color: #2563EB !important;
-    }
-
-    /* Table container constraints */
-    .table-container {
-        max-height: 480px;
-        overflow-y: auto;
-        border: 1px solid #334155;
-        border-radius: 12px;
-        background: #0F172A;
-        padding: 8px;
-        margin-bottom: 20px;
-    }
-
-    /* Checkbox enlargement */
+    
+    /* Checkbox layout helper */
     [data-testid="stCheckbox"] {
-        transform: scale(1.3);
+        transform: scale(1.2);
         margin-top: 2px;
     }
 
-    /* Button link style for item names */
-    .table-container button {
-        background-color: transparent !important;
-        border: none !important;
-        color: #F1F5F9 !important;
-        font-weight: bold !important;
-        font-size: 14px !important;
-        text-align: left !important;
-        padding: 2px 0px !important;
-        box-shadow: none !important;
-        width: 100% !important;
-        cursor: pointer;
-        white-space: normal !important;
-        display: block !important;
+    /* Table Container inside expander */
+    .table-container {
+        border: 1px solid #334155;
+        border-radius: 12px;
+        background: #0F172A;
+        padding: 12px;
+        margin-bottom: 12px;
     }
-    .table-container button:hover {
-        color: #60A5FA !important;
-        text-decoration: underline !important;
+
+    /* Styled Badges */
+    .qty-badge {
+        color: #F59E0B;
+        background-color: #78350F;
+        padding: 3px 8px;
+        border-radius: 6px;
+        font-weight: 800;
+        font-size: 11px;
+        border: 1px solid #B45309;
+        display: inline-block;
     }
-    
-    /* Mobile column optimization */
-    [data-testid="column"] {
-        padding: 2px 4px !important;
+    .qty-badge-checked {
+        color: #64748B;
+        background-color: #1E293B;
+        padding: 3px 8px;
+        border-radius: 6px;
+        font-weight: 500;
+        font-size: 11px;
+        border: 1px solid #334155;
+        text-decoration: line-through;
+        display: inline-block;
+    }
+    .store-badge {
+        background-color: rgba(59, 130, 246, 0.15);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        color: #60A5FA;
+        font-weight: bold;
+        font-size: 10px;
+        border-radius: 4px;
+        padding: 2px 6px;
+        display: inline-block;
+    }
+    .code-badge {
+        color: #60A5FA;
+        font-weight: bold;
+        font-family: monospace;
+        font-size: 11px;
+        background-color: #1E293B;
+        padding: 2px 6px;
+        border-radius: 4px;
+        display: inline-block;
+        border: 1px solid #334155;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -95,25 +104,9 @@ if "documents" not in st.session_state:
 if "revealed_codes" not in st.session_state:
     st.session_state.revealed_codes = {}
 
-# Demo items definition
-DEMO_ITEMS = [
-    {"store": "ライフ スーパー", "code": "4901301236543", "name": "北海道産 特選牛乳 (1000ml)", "quantity": "1本", "checked": False},
-    {"store": "ライフ スーパー", "code": "4901301236544", "name": "完熟バナナ (フィリピン産)", "quantity": "1袋", "checked": False},
-    {"store": "ライフ スーパー", "code": "4901301236545", "name": "国産 鶏もも肉 (特大パック)", "quantity": "500g", "checked": False},
-    {"store": "", "code": "", "name": "---EMPTY_ROW---", "quantity": "", "checked": False},
-    {"store": "マツモトキヨシ", "code": "4987067223502", "name": "鼻炎カプセルS (24カプセル)", "quantity": "1箱", "checked": False},
-    {"store": "マツモトキヨシ", "code": "4901301324221", "name": "BOXティッシュ (5箱パック)", "quantity": "1袋", "checked": False},
-    {"store": "", "code": "", "name": "---EMPTY_ROW---", "quantity": "", "checked": False},
-    {"store": "セリア", "code": "4510019120034", "name": "単3形乾電池 (4本パック)", "quantity": "1つ", "checked": False}
-]
-
-# Register demo items if not present
-if "デモ用サンプル" not in st.session_state.documents:
-    st.session_state.documents["デモ用サンプル"] = DEMO_ITEMS.copy()
-
 # --- Main Title ---
 st.markdown('<div class="main-title">PDF買い物テーブル・チェックリスト</div>', unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; color: #94A3B8; font-size: 14px; margin-bottom: 20px;'>複数PDFから空白行ごとの店舗ブロックに分けて表示します。<br>商品名をタップすると商品コードが表示され、チェックで消込が行えます。</p>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: #94A3B8; font-size: 13px; margin-bottom: 15px;'>複数PDFに対応したスマホ最適化チェックリストです。<br>商品名をタップすると商品コードが表示され、チェックボックスで消込を行えます。</p>", unsafe_allow_html=True)
 
 # --- PDF Parsing Function ---
 def extract_table_from_pdf(uploaded_file):
@@ -194,7 +187,7 @@ def extract_table_from_pdf(uploaded_file):
 
 # --- Multiple File Uploader ---
 uploaded_files = st.file_uploader(
-    "PDFファイル（複数アップロード対応）",
+    "PDFファイル（複数アップロード・表消込対応）",
     type=["pdf"],
     accept_multiple_files=True
 )
@@ -207,177 +200,281 @@ if uploaded_files:
                 if parsed_items:
                     st.session_state.documents[f.name] = parsed_items
 
+# --- No Document Fallback ---
+if not st.session_state.documents:
+    st.info("💡 PDFファイルをアップロードするか、下のボタンから空の買い物リストを作成してください。")
+    if st.button("➕ 新しい空の買い物リストを作成する"):
+        st.session_state.documents["新規買い物リスト.pdf"] = []
+        st.rerun()
+
 # --- Document Tabs Display ---
 if st.session_state.documents:
     doc_names = list(st.session_state.documents.keys())
-    tabs = st.tabs(doc_names)
     
-    for i, tab_name in enumerate(doc_names):
-        with tabs[i]:
-            items = st.session_state.documents[tab_name]
-            
-            if not items:
-                st.info("データが空です。")
-                continue
-            
-            # Grouping by empty rows or store changes
-            blocks = []
-            current_block_items = []
-            last_store = ""
-            for item in items:
-                is_empty_row = (
-                    item.get("name") == "---EMPTY_ROW---" or
-                    (not item.get("name") and not item.get("store") and not item.get("code") and not item.get("quantity"))
-                )
-                
-                item_store = item.get("store", "")
-                is_store_change = item_store and last_store and item_store != last_store
-                
-                if is_empty_row or is_store_change:
-                    if current_block_items:
-                        first_store = current_block_items[0].get("store") or "その他"
-                        blocks.append({
-                            "title": first_store,
-                            "items": current_block_items
-                        })
-                        current_block_items = []
-                
-                if not is_empty_row:
-                    current_block_items.append(item)
-                    if item_store:
-                        last_store = item_store
-            
-            if current_block_items:
-                first_store = current_block_items[0].get("store") or "その他"
-                blocks.append({
-                    "title": first_store,
-                    "items": current_block_items
-                })
-            
-            if not blocks:
-                blocks = [{"title": "その他", "items": []}]
+    # Simple active document selection (tabs or selectbox)
+    if len(doc_names) > 1:
+        active_doc_name = st.selectbox("表示するリストを選択", doc_names)
+    else:
+        active_doc_name = doc_names[0]
+        
+    st.subheader(f"📄 {active_doc_name}")
+    
+    # Remove file button
+    if st.button("🗑️ このリストを削除する", key=f"del_doc_{active_doc_name}"):
+        del st.session_state.documents[active_doc_name]
+        st.rerun()
 
-            # Progress calculation
-            valid_items = [item for item in items if item.get("name") != "---EMPTY_ROW---"]
-            total = len(valid_items)
-            checked_count = sum(1 for item in valid_items if item["checked"])
-            progress_ratio = checked_count / total if total > 0 else 0.0
+    items = st.session_state.documents.get(active_doc_name, [])
+    
+    if not items and items != []:
+        st.info("データがありません。")
+    else:
+        # Grouping by empty rows or store changes
+        blocks = []
+        current_block_items = []
+        last_store = ""
+        for item in items:
+            is_empty_row = (
+                item.get("name") == "---EMPTY_ROW---" or
+                (not item.get("name") and not item.get("store") and not item.get("code") and not item.get("quantity"))
+            )
             
-            st.write(f"全体の進捗率: {checked_count}/{total} 件 ({int(progress_ratio*100)}%)")
-            st.progress(progress_ratio)
+            item_store = item.get("store", "")
+            is_store_change = item_store and last_store and item_store != last_store
             
-            # Operation panel
-            if st.button("全チェックを解除する", key=f"reset_{tab_name}"):
+            if is_empty_row or is_store_change:
+                if current_block_items:
+                    first_store = current_block_items[0].get("store") or "その他"
+                    blocks.append({
+                        "title": first_store,
+                        "items": current_block_items
+                    })
+                    current_block_items = []
+            
+            if not is_empty_row:
+                current_block_items.append(item)
+                if item_store:
+                    last_store = item_store
+        
+        if current_block_items:
+            first_store = current_block_items[0].get("store") or "その他"
+            blocks.append({
+                "title": first_store,
+                "items": current_block_items
+            })
+        
+        if not blocks:
+            blocks = [{"title": "その他", "items": []}]
+
+        # Progress calculation
+        valid_items = [item for item in items if item.get("name") != "---EMPTY_ROW---"]
+        total = len(valid_items)
+        checked_count = sum(1 for item in valid_items if item["checked"])
+        progress_ratio = checked_count / total if total > 0 else 0.0
+        
+        st.write(f"全体の進捗率: {checked_count}/{total} 件 ({int(progress_ratio*100)}%)")
+        st.progress(progress_ratio)
+        
+        # Operation panel
+        col_ctrl1, col_ctrl2 = st.columns([2, 2])
+        with col_ctrl1:
+            if st.button("🔄 全消込を解除する", key=f"reset_{active_doc_name}"):
                 for item in items:
                     item["checked"] = False
                 st.rerun()
-                
-            # --- Block Selection UI (Column and Card style instead of tabs) ---
-            block_key = f"active_block_{tab_name}"
-            if block_key not in st.session_state:
-                st.session_state[block_key] = 0
-                
-            active_b_idx = st.session_state[block_key]
-            if active_b_idx >= len(blocks):
-                active_b_idx = 0
-                st.session_state[block_key] = 0
+        
+        # --- View Mode Selector ---
+        view_mode = st.radio(
+            "表示モードを選択",
+            ["🏪 店舗別アコーディオン", "📊 購入状態別一括表示"],
+            horizontal=True,
+            key=f"view_mode_{active_doc_name}"
+        )
 
-            st.markdown("<p style='font-size: 11px; font-weight: bold; color: #94A3B8; margin-top: 15px; margin-bottom: 5px;'>店舗・グループ（空白行で区切られたブロック）</p>", unsafe_allow_html=True)
+        if "🏪 店舗別アコーディオン" in view_mode:
+            # ==================== 🏪 店舗別アコーディオン ====================
+            st.write("👉 グループをタップすると、すぐ下に商品リストが表示されます。")
             
-            # Render indicators
-            cols = st.columns(max(len(blocks), 1))
             for b_idx, block in enumerate(blocks):
-                is_active = (b_idx == active_b_idx)
-                unchecked_count = sum(1 for item in block["items"] if not item["checked"])
+                block_title = block["title"]
+                b_items = block["items"]
                 
-                # Select indicator text depending on store name
-                icon_char = "[店]"
-                title_lower = block["title"].lower()
+                # Filter out empty rows from count
+                actual_items = [it for it in b_items if it.get("name") != "---EMPTY_ROW---"]
+                unchecked_in_block = sum(1 for it in actual_items if not it["checked"])
+                total_in_block = len(actual_items)
+                
+                # Choose indicator icon depending on store name
+                icon_char = "🏪"
+                title_lower = block_title.lower()
                 if any(x in title_lower for x in ["マツモト", "ドラッグ", "薬", "ココカラ"]):
-                    icon_char = "[薬]"
+                    icon_char = "💊"
                 elif any(x in title_lower for x in ["セリア", "ダイソー", "100", "キャンドゥ"]):
-                    icon_char = "[雑]"
+                    icon_char = "🧸"
                 elif any(x in title_lower for x in ["ライフ", "スーパー", "イオン", "業務"]):
-                    icon_char = "[食]"
+                    icon_char = "🥬"
                 
-                badge_str = f"未:{unchecked_count}" if unchecked_count > 0 else "済"
-                button_label = f"{icon_char} {block['title']}\n({badge_str})"
+                badge_str = f"残り: {unchecked_in_block}件" if unchecked_in_block > 0 else "✅ 完了！"
+                expander_label = f"{icon_char} {block_title} ({badge_str} / 合計: {total_in_block}件)"
                 
-                with cols[b_idx]:
-                    # Custom CSS border for active selection
-                    border_style = "border: 2px solid #3B82F6; background-color: rgba(59, 130, 246, 0.15);" if is_active else "border: 1px solid #334155; background-color: #0F172A;"
-                    st.markdown(f"<div style='{border_style} border-radius: 12px; padding: 4px; text-align: center; margin-bottom: 10px;'>", unsafe_allow_html=True)
-                    if st.button(button_label, key=f"block_btn_{tab_name}_{b_idx}"):
-                        st.session_state[block_key] = b_idx
-                        st.rerun()
-                    st.markdown("</div>", unsafe_allow_html=True)
+                # Using st.expander as Accordion: "グループをタップしたらすぐ下に商品が表示される"
+                # By default, expand the first block
+                is_first = (b_idx == 0)
+                with st.expander(expander_label, expanded=is_first):
+                    if not b_items:
+                        st.info("この店舗に登録されている商品はありません。")
+                    else:
+                        st.markdown('<div class="table-container">', unsafe_allow_html=True)
+                        
+                        # Sorted items (unchecked first)
+                        sorted_items = sorted(b_items, key=lambda x: x["checked"])
+                        for item in sorted_items:
+                            # Unique key calculation
+                            global_idx = items.index(item)
+                            
+                            c_chk, c_name, c_qty = st.columns([1.5, 6.5, 2])
+                            
+                            # 1. Checkbox
+                            chk_key = f"chk_ac_{active_doc_name}_{b_idx}_{global_idx}"
+                            new_val = c_chk.checkbox("", value=item["checked"], key=chk_key, label_visibility="collapsed")
+                            if new_val != item["checked"]:
+                                item["checked"] = new_val
+                                st.rerun()
+                                
+                            # 2. Item Name & Code Reveal on Tap
+                            name_val = item["name"]
+                            code_val = item.get("code") or ""
+                            is_revealed = st.session_state.revealed_codes.get(f"{active_doc_name}_{global_idx}", False)
+                            
+                            if item["checked"]:
+                                c_name.markdown(f'<span style="color: #64748B; text-decoration: line-through; font-size: 13.5px; display: block; padding-top: 4px;">🛒 {name_val}</span>', unsafe_allow_html=True)
+                            else:
+                                if c_name.button(f"🛒 {name_val}", key=f"btn_name_ac_{active_doc_name}_{b_idx}_{global_idx}"):
+                                    st.session_state.revealed_codes[f"{active_doc_name}_{global_idx}"] = not is_revealed
+                                    st.rerun()
+                                
+                                if is_revealed and code_val:
+                                    c_name.markdown(f'<div class="code-badge">コード: {code_val}</div>', unsafe_allow_html=True)
+                                    
+                            # 3. Quantity Badge
+                            qty_val = item["quantity"]
+                            if item["checked"]:
+                                c_qty.markdown(f'<div style="text-align: right; padding-top: 4px;"><span class="qty-badge-checked">{qty_val}</span></div>', unsafe_allow_html=True)
+                            else:
+                                c_qty.markdown(f'<div style="text-align: right; padding-top: 4px;"><span class="qty-badge">{qty_val}</span></div>', unsafe_allow_html=True)
+                                
+                        st.markdown('</div>', unsafe_allow_html=True)
+                        
+                        # Add item to this specific block
+                        with st.form(key=f"add_item_form_{active_doc_name}_{b_idx}", clear_on_submit=True):
+                            st.write("➕ この店舗に商品を追加")
+                            col_n, col_q = st.columns([8, 2])
+                            add_n = col_n.text_input("商品名", placeholder="例: 牛乳", key=f"new_n_{active_doc_name}_{b_idx}")
+                            add_q = col_q.text_input("数量", value="1", key=f"new_q_{active_doc_name}_{b_idx}")
+                            if st.form_submit_button("店舗リストに追加"):
+                                if add_n:
+                                    items.append({
+                                        "store": block_title,
+                                        "code": "",
+                                        "name": add_n.strip(),
+                                        "quantity": add_q.strip() or "1",
+                                        "checked": False
+                                    })
+                                    st.success(f"「{add_n}」を追加しました！")
+                                    st.rerun()
 
-            # Render item list for active block
-            active_block = blocks[active_b_idx]
-            b_items = active_block["items"]
+        else:
+            # ==================== 📊 購入状態別一括表示 ====================
+            # "購入されているものと未購入のものが一目でわかるページを作ってください"
+            st.write("📋 すべての店舗から、購入状態に合わせて一括整理して表示します。")
             
-            st.markdown('<div class="table-container">', unsafe_allow_html=True)
+            uncompleted_items = [it for it in valid_items if not it["checked"]]
+            completed_items = [it for it in valid_items if it["checked"]]
             
-            # Table header
-            c_chk, c_name, c_qty = st.columns([1, 7, 2])
-            c_chk.markdown("<span style='font-size: 11px; font-weight: bold; color: #94A3B8;'>消込</span>", unsafe_allow_html=True)
-            c_name.markdown("<span style='font-size: 11px; font-weight: bold; color: #94A3B8;'>商品名 (タップでコード)</span>", unsafe_allow_html=True)
-            c_qty.markdown("<span style='font-size: 11px; font-weight: bold; color: #94A3B8; display: block; text-align: right;'>数量</span>", unsafe_allow_html=True)
-            st.markdown("<hr style='margin: 4px 0; border-color: #334155;' />", unsafe_allow_html=True)
+            c_uncomp, c_comp = st.columns(2)
             
-            # Loop with unchecked items first
-            sorted_b_items = sorted(b_items, key=lambda x: x["checked"])
-            for idx, item in enumerate(sorted_b_items):
-                c_chk, c_name, c_qty = st.columns([1, 7, 2])
-                
-                # 1. Checkbox
-                global_idx = items.index(item)
-                chk_key = f"chk_{tab_name}_{active_b_idx}_{global_idx}"
-                new_val = c_chk.checkbox("", value=item["checked"], key=chk_key)
-                if new_val != item["checked"]:
-                    item["checked"] = new_val
-                    st.rerun()
-                
-                # 2. Item name and code
-                name_val = item["name"]
-                code_val = item.get("code") or ""
-                is_revealed = st.session_state.revealed_codes.get(f"{tab_name}_{global_idx}", False)
-                
-                if item["checked"]:
-                    c_name.markdown(f'<span style="color: #64748B; text-decoration: line-through; font-size: 13px; display: block; padding-top: 4px;"> {name_val}</span>', unsafe_allow_html=True)
+            with c_uncomp:
+                st.markdown(f"### ⚠️ 未購入の商品 ({len(uncompleted_items)}件)")
+                if not uncompleted_items:
+                    st.success("🎉 すべて購入済みです！買い物お疲れ様でした！")
                 else:
-                    if c_name.button(f" {name_val}", key=f"btn_name_{tab_name}_{active_b_idx}_{global_idx}"):
-                        st.session_state.revealed_codes[f"{tab_name}_{global_idx}"] = not is_revealed
-                        st.rerun()
-                    
-                    if is_revealed and code_val:
-                        c_name.markdown(f'<span style="color: #60A5FA; font-weight: bold; font-family: monospace; font-size: 11px; background-color: #1E293B; padding: 2px 6px; border-radius: 4px; margin-left: 24px; display: inline-block;">コード: {code_val}</span>', unsafe_allow_html=True)
-                
-                # 3. Quantity
-                qty_val = item["quantity"]
-                if item["checked"]:
-                    c_qty.markdown(f'<span style="color: #64748B; text-decoration: line-through; font-size: 13px; display: block; text-align: right; padding-top: 4px;">{qty_val}</span>', unsafe_allow_html=True)
+                    for item in uncompleted_items:
+                        global_idx = items.index(item)
+                        # Box style container
+                        st.markdown(f'<div class="table-container">', unsafe_allow_html=True)
+                        
+                        c_chk, c_info, c_qty = st.columns([1.5, 6.5, 2])
+                        # 1. Checkbox
+                        chk_key = f"chk_status_un_{active_doc_name}_{global_idx}"
+                        new_val = c_chk.checkbox("", value=False, key=chk_key, label_visibility="collapsed")
+                        if new_val:
+                            item["checked"] = True
+                            st.rerun()
+                            
+                        # 2. Name, Store, and Code
+                        name_val = item["name"]
+                        store_val = item.get("store") or "その他"
+                        code_val = item.get("code") or ""
+                        is_revealed = st.session_state.revealed_codes.get(f"{active_doc_name}_{global_idx}", False)
+                        
+                        # Info block
+                        with c_info:
+                            st.markdown(f'<span class="store-badge">🏪 {store_val}</span>', unsafe_allow_html=True)
+                            if st.button(f"🛒 {name_val}", key=f"btn_name_status_un_{active_doc_name}_{global_idx}"):
+                                st.session_state.revealed_codes[f"{active_doc_name}_{global_idx}"] = not is_revealed
+                                st.rerun()
+                            if is_revealed and code_val:
+                                st.markdown(f'<div class="code-badge">コード: {code_val}</div>', unsafe_allow_html=True)
+                                
+                        # 3. Quantity
+                        c_qty.markdown(f'<div style="text-align: right; padding-top: 15px;"><span class="qty-badge">{item["quantity"]}</span></div>', unsafe_allow_html=True)
+                        st.markdown('</div>', unsafe_allow_html=True)
+                        
+            with c_comp:
+                st.markdown(f"### ✅ 購入済みの商品 ({len(completed_items)}件)")
+                if not completed_items:
+                    st.info("チェックされた商品はまだありません。")
                 else:
-                    c_qty.markdown(f'<div style="text-align: right; padding-top: 2px;"><span style="color: #F59E0B; background-color: #78350F; padding: 3px 10px; border-radius: 8px; font-weight: 800; font-size: 12px; border: 1px solid #B45309;">{qty_val}</span></div>', unsafe_allow_html=True)
-            
-            st.markdown('</div>', unsafe_allow_html=True)
+                    for item in completed_items:
+                        global_idx = items.index(item)
+                        # Box style container (muted border/background)
+                        st.markdown(f'<div class="table-container" style="border-color: #1E293B; opacity: 0.65;">', unsafe_allow_html=True)
+                        
+                        c_chk, c_info, c_qty = st.columns([1.5, 6.5, 2])
+                        # 1. Checkbox (can uncheck)
+                        chk_key = f"chk_status_comp_{active_doc_name}_{global_idx}"
+                        new_val = c_chk.checkbox("", value=True, key=chk_key, label_visibility="collapsed")
+                        if not new_val:
+                            item["checked"] = False
+                            st.rerun()
+                            
+                        # 2. Name & Store
+                        with c_info:
+                            st.markdown(f'<span class="store-badge" style="background-color: #1E293B; color: #64748B; border-color: #334155;">🏪 {item.get("store") or "その他"}</span>', unsafe_allow_html=True)
+                            st.markdown(f'<span style="color: #64748B; text-decoration: line-through; font-size: 13.5px; display: block; font-weight: bold; padding-top: 4px;">🛒 {item["name"]}</span>', unsafe_allow_html=True)
+                            
+                        # 3. Quantity
+                        c_qty.markdown(f'<div style="text-align: right; padding-top: 15px;"><span class="qty-badge-checked">{item["quantity"]}</span></div>', unsafe_allow_html=True)
+                        st.markdown('</div>', unsafe_allow_html=True)
 
-            # Manual Addition Form
-            with st.expander("商品をテーブルに手動追加"):
-                col_add_s, col_add_c, col_add_n, col_add_q = st.columns([2, 2.5, 4, 1.5])
-                add_store = col_add_s.text_input("購入先（1列目）", key=f"add_s_{tab_name}")
-                add_code = col_add_c.text_input("商品コード（2列目）", key=f"add_c_{tab_name}")
-                add_name = col_add_n.text_input("商品名（3列目）", key=f"add_n_{tab_name}")
-                add_qty = col_add_q.text_input("数量（4列目）", key=f"add_q_{tab_name}", value="1")
+        # --- General Manual Addition (at the absolute bottom) ---
+        st.write("---")
+        with st.expander("➕ テーブルに新しい購入先や商品を手動で追加する"):
+            with st.form(key=f"general_add_form_{active_doc_name}", clear_on_submit=True):
+                col_s, col_c, col_n, col_q = st.columns([2, 2.5, 4, 1.5])
+                new_s = col_s.text_input("購入先（1列目）", placeholder="例: セリア")
+                new_c = col_c.text_input("商品コード（2列目）", placeholder="例: 4901...")
+                new_n = col_n.text_input("商品名（3列目）", placeholder="例: 単3電池")
+                new_q = col_q.text_input("数量（4列目）", value="1")
                 
-                if st.button("テーブルに追加する", key=f"btn_add_{tab_name}"):
-                    if add_name or add_store:
-                        st.session_state.documents[tab_name].append({
-                            "store": add_store,
-                            "code": add_code,
-                            "name": add_name,
-                            "quantity": add_qty,
+                if st.form_submit_button("テーブルに追加"):
+                    if new_n or new_s:
+                        items.append({
+                            "store": new_s.strip() or "その他",
+                            "code": new_c.strip(),
+                            "name": new_n.strip() or "手動追加の商品",
+                            "quantity": new_q.strip() or "1",
                             "checked": False
                         })
-                        st.success(f"追加しました！")
+                        st.success("追加しました！")
                         st.rerun()
