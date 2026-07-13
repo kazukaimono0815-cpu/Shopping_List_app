@@ -318,9 +318,10 @@ if st.session_state.documents:
                 expander_label = f"{icon_char} {block_title} ({badge_str} / 合計: {total_in_block}件)"
                 
                 # Using st.expander as Accordion: "グループをタップしたらすぐ下に商品が表示される"
-                # By default, expand the first block
+                # By default, expand the first block, and specify a unique key to persist open/closed state on rerun
                 is_first = (b_idx == 0)
-                with st.expander(expander_label, expanded=is_first):
+                expander_key = f"exp_{active_doc_name}_{block_title}_{b_idx}"
+                with st.expander(expander_label, expanded=is_first, key=expander_key):
                     if not b_items:
                         st.info("この店舗に登録されている商品はありません。")
                     else:
@@ -364,24 +365,6 @@ if st.session_state.documents:
                                 c_qty.markdown(f'<div style="text-align: right; padding-top: 4px;"><span class="qty-badge">{qty_val}</span></div>', unsafe_allow_html=True)
                                 
                         st.markdown('</div>', unsafe_allow_html=True)
-                        
-                        # Add item to this specific block
-                        with st.form(key=f"add_item_form_{active_doc_name}_{b_idx}", clear_on_submit=True):
-                            st.write("➕ この店舗に商品を追加")
-                            col_n, col_q = st.columns([8, 2])
-                            add_n = col_n.text_input("商品名", placeholder="例: 牛乳", key=f"new_n_{active_doc_name}_{b_idx}")
-                            add_q = col_q.text_input("数量", value="1", key=f"new_q_{active_doc_name}_{b_idx}")
-                            if st.form_submit_button("店舗リストに追加"):
-                                if add_n:
-                                    items.append({
-                                        "store": block_title,
-                                        "code": "",
-                                        "name": add_n.strip(),
-                                        "quantity": add_q.strip() or "1",
-                                        "checked": False
-                                    })
-                                    st.success(f"「{add_n}」を追加しました！")
-                                    st.rerun()
 
         else:
             # ==================== 📊 購入状態別一括表示 ====================
@@ -457,24 +440,4 @@ if st.session_state.documents:
                         c_qty.markdown(f'<div style="text-align: right; padding-top: 15px;"><span class="qty-badge-checked">{item["quantity"]}</span></div>', unsafe_allow_html=True)
                         st.markdown('</div>', unsafe_allow_html=True)
 
-        # --- General Manual Addition (at the absolute bottom) ---
-        st.write("---")
-        with st.expander("➕ テーブルに新しい購入先や商品を手動で追加する"):
-            with st.form(key=f"general_add_form_{active_doc_name}", clear_on_submit=True):
-                col_s, col_c, col_n, col_q = st.columns([2, 2.5, 4, 1.5])
-                new_s = col_s.text_input("購入先（1列目）", placeholder="例: セリア")
-                new_c = col_c.text_input("商品コード（2列目）", placeholder="例: 4901...")
-                new_n = col_n.text_input("商品名（3列目）", placeholder="例: 単3電池")
-                new_q = col_q.text_input("数量（4列目）", value="1")
-                
-                if st.form_submit_button("テーブルに追加"):
-                    if new_n or new_s:
-                        items.append({
-                            "store": new_s.strip() or "その他",
-                            "code": new_c.strip(),
-                            "name": new_n.strip() or "手動追加の商品",
-                            "quantity": new_q.strip() or "1",
-                            "checked": False
-                        })
-                        st.success("追加しました！")
-                        st.rerun()
+
